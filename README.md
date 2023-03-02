@@ -1,1 +1,1 @@
-# solidityctf
+# Solutions
