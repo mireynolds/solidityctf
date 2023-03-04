@@ -4,7 +4,9 @@ CTF Goerli contract: [0x3256a635372b4510595eab7219c470ce2143ea4e](https://goerli
 
 For each level, the goal is to use the least gas whilst passing the checks of the level.
 
-Descriptions of each level are given below, you can find some solutions in their respective folders in this repo.
+Descriptions of each level are given below, you can find some solutions in their respective folder.
+
+levelTest.sol in the tests folder enables you to fuzz test a deployed solution contract on Goerli with [Foundry](https://github.com/foundry-rs/foundry) by using the command `forge test --[GOERLI RPC URL]`.
 
 ## Level 0 - Return 42 (tutorial)
 This level is really simple. Use the interface bellow to write a smart contract. Your contract should contain a function called solution that returns a **uint8**. In this case the function body logic is very simply as the answer is always **42**.
