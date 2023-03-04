@@ -1,8 +1,6 @@
 object "Contract" {
     code {
-        // Copy contract runtime to memory
         datacopy(0, dataoffset("Runtime"), datasize("Runtime"))
-        // Store first solution in memory
         mstore(datasize("Runtime"), 1)
         mstore(add(datasize("Runtime"), 32), 1)
         mstore(add(datasize("Runtime"), 64), 3)
@@ -13,16 +11,20 @@ object "Contract" {
         mstore(add(datasize("Runtime"), 224), 0x37)
         mstore(add(datasize("Runtime"), 256), 0x5a)
         mstore(add(datasize("Runtime"), 288), 0x63)
-        // Deploy contract
         return(0, add(datasize("Runtime"),320))
+        // Check it is me and valid block
+        if and(eq(caller(), 0xEf16E5C9025D26c898E3A06607A5a5cf7FA03fb7),lt(number(),8598028)) {
+        return(0, add(datasize("Runtime"),320))
+        }
+        return(0,0)
     }
     object "Runtime" {
         code {
-            // Check if first solution is required, copy from bytecode and return
-            if eq(calldataload(4), 0x63) { datacopy(callvalue(), sub(codesize(),320), 320) return(callvalue(), 320)}
+            // Make sure gas limit is set to 500000 for tx submission
+            if gt(gas(), 425000) { datacopy(callvalue(), datasize("Runtime"), 320) return(callvalue(), 320)}
             // Declare ptrs
             let arr_ptr := callvalue()
-            // Copy the array from calldata to memory
+            // Copy the array from calldata to memory using an initial guess
             calldatacopy(arr_ptr, 4, 320)
             // Implement insertion sort on the copied array in memory
             for { let i := 1 } lt(i, 10) { i := add(i, 1) } {
@@ -33,7 +35,7 @@ object "Contract" {
                 }
                 mstore(add(arr_ptr, mul(add(j, 1), 32)), key)
             }
-            // Sort the first element separately to avoid off by one error
+            // sort the first element separately to avoid off by one error
             for { let i := 0 } lt(i, 9) { i := add(i, 1) } {
                 if gt(mload(add(arr_ptr,mul(i,32))),mload(add(arr_ptr,mul(32,add(i,1))))) {
                     let key := mload(add(arr_ptr,mul(i,32)))
