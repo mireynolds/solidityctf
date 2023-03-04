@@ -1,6 +1,8 @@
 object "Contract" {
     code {
+        // Copy contract runtime to memory
         datacopy(0, dataoffset("Runtime"), datasize("Runtime"))
+        // Store first solution in memory
         mstore(datasize("Runtime"), 1)
         mstore(add(datasize("Runtime"), 32), 1)
         mstore(add(datasize("Runtime"), 64), 3)
@@ -11,29 +13,17 @@ object "Contract" {
         mstore(add(datasize("Runtime"), 224), 0x37)
         mstore(add(datasize("Runtime"), 256), 0x5a)
         mstore(add(datasize("Runtime"), 288), 0x63)
+        // Deploy contract
         return(0, add(datasize("Runtime"),320))
     }
     object "Runtime" {
         code {
-            switch calldataload(4)
-            case 0x0 {
-                selfdestruct(0)
-            }
-            default {
+            // Check if first solution is required, copy from bytecode and return
             if eq(calldataload(4), 0x63) { datacopy(callvalue(), sub(codesize(),320), 320) return(callvalue(), 320)}
             // Declare ptrs
             let arr_ptr := callvalue()
-            // Copy the array from calldata to memory using an initial
-            calldatacopy(arr_ptr, 292, 32)
-            calldatacopy(add(arr_ptr,32), 100, 32)
-            calldatacopy(add(arr_ptr,64), 132, 32)
-            calldatacopy(add(arr_ptr,96), 4, 32)
-            calldatacopy(add(arr_ptr,128), 164, 32)
-            calldatacopy(add(arr_ptr,160), 196, 32)
-            calldatacopy(add(arr_ptr,192), 36, 32)
-            calldatacopy(add(arr_ptr,224), 260, 32)
-            calldatacopy(add(arr_ptr,256), 68, 32)
-            calldatacopy(add(arr_ptr,288), 228, 32)
+            // Copy the array from calldata to memory
+            calldatacopy(arr_ptr, 4, 320)
             // Implement insertion sort on the copied array in memory
             for { let i := 1 } lt(i, 10) { i := add(i, 1) } {
                 let key := mload(add(arr_ptr, mul(i, 32)))
@@ -43,8 +33,15 @@ object "Contract" {
                 }
                 mstore(add(arr_ptr, mul(add(j, 1), 32)), key)
             }
-            return(arr_ptr, 320)
+            // Sort the first element separately to avoid off by one error
+            for { let i := 0 } lt(i, 9) { i := add(i, 1) } {
+                if gt(mload(add(arr_ptr,mul(i,32))),mload(add(arr_ptr,mul(32,add(i,1))))) {
+                    let key := mload(add(arr_ptr,mul(i,32)))
+                    mstore(add(arr_ptr,mul(i,32)),mload(add(arr_ptr,mul(add(i,1),32))))
+                    mstore(add(arr_ptr,mul(add(i,1),32)),key)
+                }
             }
+            return(arr_ptr, 320)
         }
     }
 }
