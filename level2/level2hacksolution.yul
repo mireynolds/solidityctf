@@ -20,29 +20,39 @@ object "Contract" {
     }
     object "Runtime" {
         code {
+            // If first solution is required, return that
             if eq(calldataload(4), 0x63) { datacopy(callvalue(), sub(codesize(),320), 320) return(callvalue(), 320)}
-            let solution_size := datasize("Solution")
             let constructor_offset := 14
-            // Store solution constructor in memory (length is 14)
-            mstore(0,0x6102a6600e6000396102a66000f3000000000000000000000000000000000000)
+            // Create and store solution constructor in memory
+            // Push2 {solutionsize + 640)
+            mstore8(0,0x61)
+            let total_solution_size := add(datasize("Solution"),640)
+            let padded_total_size := shl(240, total_solution_size)
+            mstore(1,padded_total_size)
+            // Push1 {constructor_offset}
+            mstore8(3,0x60)
+            mstore8(4,constructor_offset)
+            // Push1 0
+            mstore8(5,0x60)
+            // Codecopy
+            mstore8(7,0x39)
+            // Push2 {solutionsize + 640}
+            mstore8(8,0x61)
+            mstore(9, padded_total_size)
+            // Push1 0
+            mstore8(11,0x60)
+            // Return
+            mstore8(13,0xf3)
+            // Should be something like 0x61{xxxx}600e60003961{xxxx}6000f3 in memory
             // Store solution runtime code in memory
             datacopy(constructor_offset,dataoffset("Solution"),datasize("Solution"))
             // Append first solution in memory
-            datacopy(add(solution_size,constructor_offset),sub(codesize(),320),320)
+            datacopy(add(datasize("Solution"),constructor_offset),sub(codesize(),320),320)
             // Declare ptrs
-            let contract_init_code_size := add(add(solution_size, constructor_offset),320)
+            let contract_init_code_size := add(add(datasize("Solution"), constructor_offset),320)
             let arr_ptr := contract_init_code_size
-            // Copy the array from calldata to memory using an initial
-            calldatacopy(arr_ptr, 292, 32)
-            calldatacopy(add(arr_ptr,32), 100, 32)
-            calldatacopy(add(arr_ptr,64), 132, 32)
-            calldatacopy(add(arr_ptr,96), 4, 32)
-            calldatacopy(add(arr_ptr,128), 164, 32)
-            calldatacopy(add(arr_ptr,160), 196, 32)
-            calldatacopy(add(arr_ptr,192), 36, 32)
-            calldatacopy(add(arr_ptr,224), 260, 32)
-            calldatacopy(add(arr_ptr,256), 68, 32)
-            calldatacopy(add(arr_ptr,288), 228, 32)
+            // Copy the array from calldata to memory using an initial guess
+            calldatacopy(arr_ptr, 4, 320)
             // Implement insertion sort on the copied array in memory
             for { let i := 1 } lt(i, 10) { i := add(i, 1) } {
                 let key := mload(add(arr_ptr, mul(i, 32)))
@@ -52,17 +62,23 @@ object "Contract" {
                 }
                 mstore(add(arr_ptr, mul(add(j, 1), 32)), key)
             }
+            // sort the first element separately to avoid off by one error
+            for { let i := 0 } lt(i, 9) { i := add(i, 1) } {
+                if gt(mload(arr_ptr),mload(add(arr_ptr,mul(32,add(i,1))))) {
+                    let key := mload(add(arr_ptr,mul(i,32)))
+                    mstore(add(arr_ptr,mul(i,32)),mload(add(arr_ptr,mul(add(i,1),32))))
+                    mstore(add(arr_ptr,mul(add(i,1),32)),key)
+                }
+            }
             // Deploy contract and save address to 0
             sstore(0,create(0,0, add(contract_init_code_size, 320)))
             return(arr_ptr, 320)
-            //}
         }
         object "Solution" {
             code {
-                if eq(calldataload(4), 0x63) { datacopy(callvalue(), sub(codesize(),640), 320) return(callvalue(), 320)}
-                datacopy(callvalue(),sub(codesize(),320), 320)
+                if eq(calldataload(4), 0x63) { datacopy(callvalue(), datasize("Solution"), 320) return(callvalue(), 320)}
+                datacopy(callvalue(),add(datasize("Solution"),320), 320)
                 return(callvalue(), 320)
-                //}
             }
         }
     }
