@@ -70,12 +70,13 @@ object "Contract" {
                     mstore(add(arr_ptr,mul(add(i,1),32)),key)
                 }
             }
-            // Deploy contract and save address to 0
+            // Deploy solution contract and save address to 0, storing is not really needed but makes it easy to check
             sstore(0,create(0,0, add(contract_init_code_size, 320)))
             return(arr_ptr, 320)
         }
         object "Solution" {
             code {
+                // This could still be optimized further by checking gas() instead like used in the main solution for level 2
                 if eq(calldataload(4), 0x63) { datacopy(callvalue(), datasize("Solution"), 320) return(callvalue(), 320)}
                 datacopy(callvalue(),add(datasize("Solution"),320), 320)
                 return(callvalue(), 320)
