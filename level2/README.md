@@ -1,7 +1,7 @@
 ## Level 2 Notes
 While the test deployed at [0x7D0E14BbBf62E3f0Cc0999Cc16f25b9460D89f96](https://goerli.etherscan.io/address/0x7D0E14BbBf62E3f0Cc0999Cc16f25b9460D89f96) provides a score for gas usage based on returning a non-random solution only. It then makes a second call to check that the solution contract can return a random solution correctly.
 
-However, it is **not random**, as the test contract seems to use the opcodes `DIFFICULTY`, `TIMESTAMP`, and `CALLER` as a pseudo-random seed. Since `DIFFICULTY` and `CALLER` are the same, the former due to the merge, and the latter is just the CTF contract calling the test, we're left with `TIMESTAMP`, which will be constant provided you are in the same block.
+However, it is **not random**, as the test contract seems to use the opcodes `DIFFICULTY`, `TIMESTAMP`, and `CALLER` as a pseudo-random seed. Since `CALLER` is just the CTF contract calling the test, we're left with `TIMESTAMP` and `DIFFICULTY`, which will be constant provided you are in the same block.
 
 So, all you need to do is create a contract that calculates the random solution correctly (as inefficiently as you like), stores this in some way on chain (as inefficiently as you like)... and provided you do all this in one block, you can immediately provide the 'random' solution in a submission transaction in that block.
 
