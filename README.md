@@ -47,3 +47,69 @@ interface Isolution2 {
 }
 ```
 Level 2 test contract: [0x7D0E14BbBf62E3f0Cc0999Cc16f25b9460D89f96](https://goerli.etherscan.io/address/0x7D0E14BbBf62E3f0Cc0999Cc16f25b9460D89f96)
+
+## Level 3 - codeSize
+
+Using the Isolution3 interface write a function that takes an address and returns the codeSize of that address as a uint256.
+```solidity
+interface Isolution3 {
+    function solution(address addr) external view 
+    returns (uint256 codeSize);
+}
+```
+Level 3 test contract: [0x81C81Ae05dB618ffe1FE1ee4e37886fe86f76c34](https://goerli.etherscan.io/address/0x81C81Ae05dB618ffe1FE1ee4e37886fe86f76c34)
+
+## Level 4 - Memory
+
+Using the Isolution4 interface write a function that takes a uint256 and saves it to memory slot 3.
+```solidity
+interface Isolution4 {
+    function solution(uint256 value) external;
+}
+```
+Level 4 test contract: [0xdee429a9041cC9d42Ff3A09935170205F037F169](https://goerli.etherscan.io/address/0xdee429a9041cC9d42Ff3A09935170205F037F169)
+
+## Level 5 - Modular Exponentiation
+
+Using the Isolution5 interface calculate Modular Exponentiation (base**exp % mod). Implementing it from scratch would take too much gas so you will need to use the precompiled contract at address 0x05
+```solidity
+interface Isolution5 {
+
+    function solution(
+        bytes32 b,
+        bytes32 ex, 
+        bytes32 mod) 
+    external returns (
+        bytes32 result
+    );
+
+}
+```
+Level 5 test contract: [0xf420D13dC67191cCd274c1746cE272cfc0143Ff4](https://goerli.etherscan.io/address/0xf420D13dC67191cCd274c1746cE272cfc0143Ff4)
+
+## Level 6 - Verifying Signatures
+
+For this level we signed some messages off chain using the following front end code:
+```javascript
+const ethers = require('ethers');
+
+let messageHash = ethers.utils.id("bidPrice(0.420)");
+let messageHashBytes = ethers.utils.arrayify(messageHash);
+let flatSig = await wallet.signMessage(messageHashBytes); // Sign the binary data
+let sig = ethers.utils.splitSignature(flatSig);  // sig.v sig.r sig.s etc
+```
+Using the Isolution6 interface write a function that will take the messageHash (plus params) and return the signer of the message.
+
+Hint: Don't forget to prepend your message with “\x19Ethereum Signed Message:\n32”
+```solidity
+interface Isolution6 {
+    function solution(
+      bytes32 messageHash, 
+      uint8 v, 
+      bytes32 r, 
+      bytes32 s
+      ) external pure 
+    returns (address signer);
+}
+```
+Level 6 test contract: [0x719Df2d793B3b21D84b5e81be450785752834950](https://goerli.etherscan.io/address/0x719Df2d793B3b21D84b5e81be450785752834950)
