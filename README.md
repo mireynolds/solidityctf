@@ -1,4 +1,4 @@
-# Some Solutions to Encode Club Expert Solidity CTF (Feb '23 Cohort)
+# Some (winning) solutions to Encode Club Expert Solidity CTF (Feb '23 Cohort)
 CTF frontend: https://www.solidityctf.xyz/
 CTF Goerli contract: [0x3256a635372b4510595eab7219c470ce2143ea4e](https://goerli.etherscan.io/address/0x3256a635372b4510595eab7219c470ce2143ea4e)
 
